@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver.Core.Connections;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using StackExchange.Redis;
 using System.Net;
 using System.Security.Cryptography.Xml;
 using System.Text;
@@ -11,6 +13,7 @@ using System.Threading.Channels;
 using TinyUrl.Middleware;
 using TinyUrl.Models;
 using TinyUrl.Services;
+using TinyUrl.Services.interfaces;
 using ZstdSharp.Unsafe;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +41,11 @@ builder.Services.AddSwaggerGen(options =>
 // mongo
 builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<UserService>();
+builder.Services.AddScoped<IUrlService,UrlService>();
+
+// redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379"));
+builder.Services.AddSingleton<RedisService>();
 
 builder.Services.AddTransient<ExceptionMiddleware>();
 

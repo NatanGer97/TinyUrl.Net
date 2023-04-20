@@ -25,9 +25,9 @@ namespace TinyUrl.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<List<User>>> GetUserAync()
+        public async Task<ActionResult<List<User>>> GetUsersAync()
         {
-            return await userService.GetUserAync();
+            return await userService.GetUsersAync();
         }
 
         [HttpPost, Route("Register")]
@@ -35,6 +35,7 @@ namespace TinyUrl.Controllers
         {
             if (!ModelState.IsValid)
             {
+                Console.WriteLine("error");
                 return BadRequest();
             }
 

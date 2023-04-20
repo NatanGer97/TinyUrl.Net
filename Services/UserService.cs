@@ -40,7 +40,7 @@ namespace TinyUrl.Services
 
     
 
-        public async Task<List<User>> GetUserAync()
+        public async Task<List<User>> GetUsersAync()
         {
             return await usersCollection.Find(_ => true).ToListAsync();
         }
@@ -68,6 +68,31 @@ namespace TinyUrl.Services
 
           
 
+
+        }
+
+        public async Task<User?> FindUserByIdAsync(string userId)
+        {
+            return await usersCollection.Find(user => user.Id == userId).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> IncrementMongoField(string userEmail, String key)
+        {
+            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("Email", userEmail);
+            UpdateDefinition<User> updateDefinition = Builders<User>.Update.Inc(key, 1);
+            UpdateResult updateResult = await usersCollection.UpdateOneAsync(filterDefinition, updateDefinition);
+
+            return updateResult.ModifiedCount == 1;
+        }
+
+        public async Task<bool> AddTinyUrlToUser(string tinyurl, string userEmail)
+        {
+            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("Email", userEmail);
+            UpdateDefinition<User> updateDefinition = Builders<User>.Update.AddToSet("urls", tinyurl);
+
+            UpdateResult updateResult = await usersCollection.UpdateOneAsync(filterDefinition, updateDefinition);
+
+            return updateResult.ModifiedCount == 1;
 
         }
     }
