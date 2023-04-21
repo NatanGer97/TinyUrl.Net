@@ -13,16 +13,15 @@ namespace TinyUrl.Services
     {
         
         private readonly IMongoCollection<User> usersCollection;
-        private readonly IMapper mapper;
 
-        public UserService(IOptions<MongoDBSettings> mongoDbSettings, IMapper mapper)
+        public UserService(IOptions<MongoDBSettings> mongoDbSettings)
         {
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
             /*createCollection(mongoDatabase);*/
             this.usersCollection = mongoDatabase.GetCollection<User>(mongoDbSettings.Value.UserCollectionName);
 
-            this.mapper = mapper;
+            
         }
 
         private void createCollection(IMongoDatabase mongoDatabase)

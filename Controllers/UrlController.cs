@@ -8,6 +8,7 @@ using TinyUrl.Models.Dto;
 using TinyUrl.Models.Responses;
 using TinyUrl.Services;
 using TinyUrl.Services.interfaces;
+using System.ComponentModel.DataAnnotations;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,7 +25,6 @@ namespace TinyUrl.Controllers
             this.userService = userService;
             this.urlService = urlService;            
         }
-        
 
         [HttpPost("createUrl")]
         public async Task<ActionResult> CreateUrl([FromBody] NewTinyUrlReq newTinyUrlReq)
@@ -39,7 +39,7 @@ namespace TinyUrl.Controllers
 
             if (newTinyUrlReq.Url == null) return BadRequest();
 
-            string createdTinyUrl = urlService.CreateNewTinyUrl(newTinyUrlReq);
+            string createdTinyUrl = await urlService.CreateNewTinyUrlAsync(newTinyUrlReq);
             
             if (createdTinyUrl != null || createdTinyUrl != string.Empty)
             {

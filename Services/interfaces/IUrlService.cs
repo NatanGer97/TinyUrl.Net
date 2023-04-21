@@ -12,7 +12,7 @@ namespace TinyUrl.Services.interfaces
         /// <returns>return tiny url</returns>
         /// <exception cref="InternalServerException"></exception>
         /// <exception cref="InternalServerException"></exception>
-        string CreateNewTinyUrl(NewTinyUrlReq newTinyUrlReq);
+        Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq);
 
         /// <summary>
         /// find and return tinyurl obj fitting to to given code
