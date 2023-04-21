@@ -39,10 +39,11 @@ namespace TinyUrl.Controllers
             {
                 string url = tinyUrlFromRedis.Url;
                 logger.LogInformation("Redirecting to -> " + url);
-                // on click do
-                await userService.IncrementMongoField(tinyUrlFromRedis.Username, "UserClicks");
-                await userService.IncrementMongoField(tinyUrlFromRedis.Username, "shorts_" + tiny + "_clicks_" + DateTime.UtcNow.ToString("MM/yyyy"));
-                
+                // on click 
+                await urlService.OnUrlClickAsync(tiny, tinyUrlFromRedis.Username);
+                /*await userService.IncrementClickField(tinyUrlFromRedis.Username, "UserClicks");
+                await userService.IncrementClickField(tinyUrlFromRedis.Username, "shorts_" + tiny + "_clicks_" + DateTime.UtcNow.ToString("MM/yyyy"));*/
+
                 return Redirect(url);
             }
 

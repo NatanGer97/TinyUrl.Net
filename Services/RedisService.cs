@@ -48,7 +48,26 @@ namespace TinyUrl.Services
         /// <returns> true if exsit, false if not </returns>
         public bool isTinyCodeExist(string tinyCode)
         {
-            return redis.KeyExists(tinyCode);
+            logger.LogInformation("check if key " + tinyCode + " exist in redis");
+            bool isSuccess = redis.KeyExists(tinyCode);
+            logger.LogInformation("is key exist: " + isSuccess);
+
+            return isSuccess;
+
+        }
+
+        /// <summary>
+        /// set value to redis
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns><see langword="true"/> if the string was set, <see langword="false"/> otherwise.</returns>
+        public bool SetValue(string key, object value)
+        {
+            bool isSuccess = redis.StringSet(key, JsonConvert.SerializeObject(value));
+            logger.LogInformation("set key " + key + " to redis, status: " + isSuccess);
+
+            return isSuccess;
         }
 
 

@@ -7,12 +7,13 @@ using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using TinyUrl.Models;
 using TinyUrl.Models.Dto;
+using TinyUrl.Models.Enums;
 
 namespace TinyUrl.Services
 {
-    public class UserService 
+    public class UserService
     {
-        
+
         private readonly IMongoCollection<User> usersCollection;
 
         public UserService(IOptions<MongoDBSettings> mongoDbSettings)
@@ -22,7 +23,7 @@ namespace TinyUrl.Services
             /*createCollection(mongoDatabase);*/
             this.usersCollection = mongoDatabase.GetCollection<User>(mongoDbSettings.Value.UserCollectionName);
 
-            
+
         }
 
         private void createCollection(IMongoDatabase mongoDatabase)
@@ -40,7 +41,7 @@ namespace TinyUrl.Services
             }
         }
 
-    
+
 
         public async Task<List<User>> GetUsersAync()
         {
@@ -67,7 +68,7 @@ namespace TinyUrl.Services
 
             await usersCollection.InsertOneAsync(newUser);
 
-            return await usersCollection.Find(user => user.UserName == newUser.UserName).FirstAsync();        
+            return await usersCollection.Find(user => user.UserName == newUser.UserName).FirstAsync();
 
         }
 
@@ -76,13 +77,44 @@ namespace TinyUrl.Services
             return await usersCollection.Find(user => user.Id == userId).FirstOrDefaultAsync();
         }
 
-        public async Task<bool> IncrementMongoField(string username, string key)
+        /// <summary>
+        /// increment query for clicks increamns
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="tinycode">string or null if, tiny code is not part of the key</param>
+        /// <param name="key"></param>
+        /// <returns> <see langword="true"/> if succeess otherwise <see langword="false"/> </returns>
+        public async Task<bool> IncrementClickField(string username, string tinycode, eKeys key)
         {
             FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("UserName", username);
-            UpdateDefinition<User> updateDefinition = Builders<User>.Update.Inc(key, 1);
+            UpdateDefinition<User> updateDefinition = Builders<User>.Update.Inc(createKey(key,tinycode), 1);
             UpdateResult updateResult = await usersCollection.UpdateOneAsync(filterDefinition, updateDefinition);
 
             return updateResult.ModifiedCount == 1;
+        }
+
+        /// <summary>
+        /// creates key to mongo increment click query
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="tinycode"></param>
+        /// <returns>key to the query</returns>
+        private string createKey(eKeys key, string tinycode)
+        {
+            string results = string.Empty;
+            switch (key)
+            {
+                case eKeys.UserClicks:
+                    results = "UserClicks";
+                    break;
+                case eKeys.UserTinyUrlsClicksMonth:
+                    results = tinycode + "_clicks_" + DateTime.UtcNow.ToString("MM/yyyy");
+                    break;
+                default:
+                    break;
+            }
+
+            return results;
         }
 
         public async Task<bool> AddTinyUrlToUser(string tinyurl, string username)

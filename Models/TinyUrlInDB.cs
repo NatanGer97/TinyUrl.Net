@@ -9,6 +9,7 @@ namespace TinyUrl.Models
         public string Id { get; set; }
         public string Tiny { get; set; }
         public string OriginalUrl { get; set; }
+        
         public DateTime CreatedAt { get; set; }
 
         public string Username { get; set; }

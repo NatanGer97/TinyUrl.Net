@@ -9,6 +9,7 @@ using System.Text.Json;
 using TinyUrl.Builders;
 using TinyUrl.Models;
 using TinyUrl.Models.Dto;
+using TinyUrl.Models.Enums;
 using TinyUrl.Models.Responses;
 using TinyUrl.Services.interfaces;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
@@ -20,23 +21,19 @@ namespace TinyUrl.Services
         private const int TINY_SIZE = 4;
         private const int NUM_OF_RETRIES = 5;
         private readonly string CHARS = "ABCDEFHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        
-        private readonly IConnectionMultiplexer redisConnection;        
-        private readonly IDatabase redis;
+       
         private readonly IMongoCollection<TinyUrlInDB> tinyUrlCollection;
         private readonly IRedisService redisService;
+        private readonly UserService userService;
 
-        public UrlService(IConnectionMultiplexer redis, IRedisService redisService,
+        public UrlService( IRedisService redisService, UserService userService,
             IOptions<MongoDBSettings> mongoDbSettings)
         {
-            // need to be removed
-            this.redisConnection = redis;
-            this.redis = redis.GetDatabase();
-
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
             this.tinyUrlCollection = mongoDatabase.GetCollection<TinyUrlInDB>(mongoDbSettings.Value.TinyUrlCollectionName);
             this.redisService = redisService;
+            this.userService = userService;
         }
 
         public async Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq)
@@ -55,9 +52,7 @@ namespace TinyUrl.Services
                 throw new InternalServerException("Can't generate tiny url, all options are taken");
             }
 
-            // set into redis
-            /*bool success = redis.StringSet(tinyCode, JsonConvert.SerializeObject(tinyUrlReq));*/
-
+           
             TinyUrlInDB tinyUrlInDB = await addToDatabasesAsync(tinyCode, newTinyUrlReq);
             
             if (tinyUrlInDB == null)
@@ -66,6 +61,12 @@ namespace TinyUrl.Services
             }
 
             return "https://localhost:7112/" + tinyCode; ;
+        }
+
+        public async Task OnUrlClickAsync(string tinyUrl, string username)
+        {
+            await userService.IncrementClickField(username, string.Empty, eKeys.UserClicks);
+            await userService.IncrementClickField(username, tinyUrl, eKeys.UserTinyUrlsClicksMonth);
         }
 
         private async Task<TinyUrlInDB> addToDatabasesAsync(string tinycode, NewTinyUrlReq newTinyUrlReq)
@@ -77,8 +78,9 @@ namespace TinyUrl.Services
                 Tiny = tinycode,
                 Username = newTinyUrlReq.Username
             };
-            
-            redis.StringSet(tinycode, JsonConvert.SerializeObject(newTinyUrlReq));
+            // set to redis
+            bool isSuccess = redisService.SetValue(tinycode, newTinyUrlReq);
+            // add into mongo
             TinyUrlInDB tinyUrlInDB = await addToTinyUrlsCollectionAsync(tinycode, tinyUrl);
 
             return tinyUrlInDB;
