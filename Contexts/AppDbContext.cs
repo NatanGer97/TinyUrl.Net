@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TinyUrl.Models;
 
-namespace StudentsDashboard.Contexts
+namespace TinyUrl.Contexts
 {
     public class AppDbContext : DbContext
     {
