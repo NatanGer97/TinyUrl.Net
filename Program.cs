@@ -48,7 +48,7 @@ builder.Services.AddScoped<IUrlService,UrlService>();
 
 // redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379"));
-builder.Services.AddSingleton<RedisService>();
+builder.Services.AddSingleton<IRedisService, RedisService>();
 
 builder.Services.AddTransient<ExceptionMiddleware>();
 

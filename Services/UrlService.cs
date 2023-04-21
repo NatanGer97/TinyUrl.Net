@@ -24,15 +24,19 @@ namespace TinyUrl.Services
         private readonly IConnectionMultiplexer redisConnection;        
         private readonly IDatabase redis;
         private readonly IMongoCollection<TinyUrlInDB> tinyUrlCollection;
+        private readonly IRedisService redisService;
 
-        public UrlService(IConnectionMultiplexer redis, IOptions<MongoDBSettings> mongoDbSettings)
+        public UrlService(IConnectionMultiplexer redis, IRedisService redisService,
+            IOptions<MongoDBSettings> mongoDbSettings)
         {
+            // need to be removed
             this.redisConnection = redis;
             this.redis = redis.GetDatabase();
 
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
             this.tinyUrlCollection = mongoDatabase.GetCollection<TinyUrlInDB>(mongoDbSettings.Value.TinyUrlCollectionName);
+            this.redisService = redisService;
         }
 
         public async Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq)
@@ -41,7 +45,7 @@ namespace TinyUrl.Services
             string tinyCode = generateTinyCode();
             int counter = 0;
 
-            while (isTinyCodeExist(tinyCode) && counter++ < NUM_OF_RETRIES)
+            while (redisService.isTinyCodeExist(tinyCode) && counter++ < NUM_OF_RETRIES)
             {
                 tinyCode = generateTinyCode();
             }
@@ -88,29 +92,9 @@ namespace TinyUrl.Services
 
             return tinyUrlInDB;
         }
-        
-        
 
-        public TinyUrlFromRedis? GetTinyUrlObjByCode(string tinyCode)
-        {
-            if (!isTinyCodeExist(tinyCode))
-            {
-                throw new NotFoundException("Key " + tinyCode + " not exist");
-            }
 
-            RedisValue redisValue = redis.StringGet(tinyCode);
-            TinyUrlFromRedis? tinyUrlFromRedis = JsonConvert.DeserializeObject<TinyUrlFromRedis>(redisValue.ToString());
-
-            return tinyUrlFromRedis;
-        }
-        
-
-        public bool isTinyCodeExist(string tinyCode)
-        {
-            return redis.KeyExists(tinyCode);
-        }
-        
-
+        // TODO: move out -> strategy pattern(?)
         private string generateTinyCode()
         {
             StringBuilder code = new StringBuilder();

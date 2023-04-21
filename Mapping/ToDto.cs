@@ -10,9 +10,6 @@ namespace TinyUrl.Mapping
         {
             CreateMap<User, UserDtoOut>()
                 .ForMember(userDto => userDto.TinyUrlsStatistic, opt => opt.MapFrom(user => user.ExtraStatProperties));
-                
-
-
         }
     }
 }

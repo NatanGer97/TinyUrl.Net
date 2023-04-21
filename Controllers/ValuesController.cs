@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using SharpCompress.Readers;
 using System.Globalization;
 using System.Runtime.Serialization;
 using TinyUrl.Models;
@@ -18,18 +19,21 @@ namespace TinyUrl.Controllers
         private readonly UserService userService;
         private readonly IUrlService urlService;
         private readonly ILogger<IndexController> logger;
+        private readonly IRedisService redisService;
 
-        public IndexController(UserService userService, IUrlService urlService, ILogger<IndexController> logger)
+        public IndexController(UserService userService, IUrlService urlService, IRedisService redisService,
+            ILogger<IndexController> logger)
         {
             this.userService = userService;
             this.urlService = urlService;
             this.logger = logger;
+            this.redisService = redisService;
         }
 
         [HttpGet("{tiny}")]
         public async Task<ActionResult> RedirectToOrginalUrlAsync([FromRoute] string tiny)
         {
-            TinyUrlFromRedis? tinyUrlFromRedis = urlService.GetTinyUrlObjByCode(tiny);
+            TinyUrlFromRedis? tinyUrlFromRedis = redisService.GetTinyUrlObjByCode(tiny);
 
             if (tinyUrlFromRedis != null)
             {
