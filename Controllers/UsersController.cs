@@ -19,6 +19,7 @@ namespace TinyUrl.Controllers
         private readonly UserService userService;
         private readonly IConfiguration configuration;
         private readonly IMapper mapper;
+        
         public UsersController(UserService userService, IConfiguration configuration, IMapper mapper)
         {
             this.configuration = configuration; 
@@ -28,7 +29,7 @@ namespace TinyUrl.Controllers
         
 
         [HttpGet]
-        public async Task<ActionResult<List<User>>> GetUsersAync()
+        public async Task<ActionResult<List<UserDtoOut>>> GetUsersAync()
         {
             List<User> users = await userService.GetUsersAync();
             return Ok(mapper.Map<List<UserDtoOut>>(users));

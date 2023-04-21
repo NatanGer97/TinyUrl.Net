@@ -8,8 +8,11 @@ namespace TinyUrl.Mapping
     {
         public ToDto()
         {
-            CreateMap<User, UserDtoOut>();
-               
+            CreateMap<User, UserDtoOut>()
+                .ForMember(userDto => userDto.TinyUrlsStatistic, opt => opt.MapFrom(user => user.ExtraStatProperties));
+                
+
+
         }
     }
 }

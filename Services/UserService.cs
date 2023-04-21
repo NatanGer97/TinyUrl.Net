@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using TinyUrl.Models;
@@ -44,7 +45,7 @@ namespace TinyUrl.Services
         public async Task<List<User>> GetUsersAync()
         {
             return await usersCollection.Find(_ => true).ToListAsync();
-            
+
         }
 
         /// <summary>

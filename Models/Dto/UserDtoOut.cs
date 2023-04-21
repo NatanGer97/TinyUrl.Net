@@ -8,15 +8,15 @@ namespace TinyUrl.Models.Dto
         public string? FullName { get; set; }
         public string? UserName { get; set; }
 
-        public int UserClicks { get; set; }
+        /*public int UserClicks { get; set; }*/
 
-        [BsonExtraElements]
+        
         public Dictionary<string, int> TinyUrlsStatistic { get; set; }
 
         public UserDtoOut()
         {
             TinyUrlsStatistic = new Dictionary<string, int>();
-            UserClicks = 0;
+            /*sUserClicks = 0;*/
         }
 
     }
