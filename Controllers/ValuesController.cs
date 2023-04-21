@@ -35,15 +35,18 @@ namespace TinyUrl.Controllers
         {
             TinyUrlFromRedis? tinyUrlFromRedis = redisService.GetTinyUrlObjByCode(tiny);
 
+            if (tinyUrlFromRedis == null) return NotFound();
+
+            UserClick userClick = UserClick.UserClickFrom(tinyUrlFromRedis.Username, tiny, tinyUrlFromRedis.Url);
+
+
             if (tinyUrlFromRedis != null)
             {
                 string url = tinyUrlFromRedis.Url;
                 logger.LogInformation("Redirecting to -> " + url);
                 // on click 
-                await urlService.OnUrlClickAsync(tiny, tinyUrlFromRedis.Username);
-                /*await userService.IncrementClickField(tinyUrlFromRedis.Username, "UserClicks");
-                await userService.IncrementClickField(tinyUrlFromRedis.Username, "shorts_" + tiny + "_clicks_" + DateTime.UtcNow.ToString("MM/yyyy"));*/
-
+                await urlService.OnUrlClickAsync(userClick);
+             
                 return Redirect(url);
             }
 

@@ -14,7 +14,7 @@ namespace TinyUrl.Services.interfaces
         /// <exception cref="InternalServerException"></exception>
         Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq);
 
-        Task OnUrlClickAsync(string tinyUrl, string username);
+        Task OnUrlClickAsync(UserClick userClick);
 
 
 

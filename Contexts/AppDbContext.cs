@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TinyUrl.Models;
 
 namespace TinyUrl.Contexts
@@ -29,6 +30,7 @@ namespace TinyUrl.Contexts
                 .HasColumnName("username");
             modelBuilder.Entity<UserClick>().Property(userClick => userClick.ClickedAt).IsRequired()
                 .HasColumnName("clicked_at");
+                
         }
     }
 }

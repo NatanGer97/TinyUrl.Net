@@ -15,7 +15,7 @@ namespace TinyUrl.Repos
             await _context.UserClicks.AddAsync(click);
         }
 
-        public async Task<List<UserClick>> GetAllClickes()
+        public async Task<List<UserClick>> GetAllClickesAsync()
         {
             return await _context.UserClicks.ToListAsync();
         }

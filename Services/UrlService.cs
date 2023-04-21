@@ -25,15 +25,17 @@ namespace TinyUrl.Services
         private readonly IMongoCollection<TinyUrlInDB> tinyUrlCollection;
         private readonly IRedisService redisService;
         private readonly UserService userService;
+        private readonly IUserClickService userClickService;
 
         public UrlService( IRedisService redisService, UserService userService,
-            IOptions<MongoDBSettings> mongoDbSettings)
+            IOptions<MongoDBSettings> mongoDbSettings, IUserClickService userClickService)
         {
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
             this.tinyUrlCollection = mongoDatabase.GetCollection<TinyUrlInDB>(mongoDbSettings.Value.TinyUrlCollectionName);
             this.redisService = redisService;
             this.userService = userService;
+            this.userClickService = userClickService;
         }
 
         public async Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq)
@@ -63,10 +65,15 @@ namespace TinyUrl.Services
             return "https://localhost:7112/" + tinyCode; ;
         }
 
-        public async Task OnUrlClickAsync(string tinyUrl, string username)
+        public async Task OnUrlClickAsync(UserClick userClick)
         {
+            string tinyUrl = userClick.TinyUrl;
+            string username = userClick.Username;
+            // increment user clicks
             await userService.IncrementClickField(username, string.Empty, eKeys.UserClicks);
             await userService.IncrementClickField(username, tinyUrl, eKeys.UserTinyUrlsClicksMonth);
+            // save new click instacne
+            await userClickService.AddNewClickAsync(userClick);
         }
 
         private async Task<TinyUrlInDB> addToDatabasesAsync(string tinycode, NewTinyUrlReq newTinyUrlReq)

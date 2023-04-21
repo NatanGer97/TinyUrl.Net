@@ -7,13 +7,16 @@ using MongoDB.Driver.Core.Connections;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
-using StudentsDashboard.Contexts;
+using StudentsDashboard.UnitOfWork;
 using System.Net;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Channels;
+using TinyUrl.Contexts;
 using TinyUrl.Middleware;
 using TinyUrl.Models;
+using TinyUrl.Repos;
+using TinyUrl.Repos.interfaces;
 using TinyUrl.Services;
 using TinyUrl.Services.interfaces;
 using ZstdSharp.Unsafe;
@@ -46,7 +49,12 @@ builder.Services.AddAutoMapper(typeof(Program));
 // mongo
 builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<UserService>();
-builder.Services.AddScoped<IUrlService,UrlService>();
+
+// services and respos
+builder.Services.AddScoped<IUrlService, UrlService>();
+builder.Services.AddScoped<IUserClickService, UserClickService>();
+builder.Services.AddScoped<IUserClickRepository, UserClicksRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // postgreSql
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -81,26 +89,30 @@ builder.Services.AddAuthentication(options =>
         RequireExpirationTime = true, // for dev - need to be updated when refresh token is add
         ValidateLifetime = true,
     };
-    
+
     jwt.Events = new JwtBearerEvents();
     jwt.Events.OnAuthenticationFailed = context =>
     {
         Console.WriteLine("OnAuthenticationFailed");
         context.Exception.GetBaseException();
-        
+
         return Task.CompletedTask;
 
     };
-    
+
     jwt.Events.OnChallenge = context =>
     {
         Console.WriteLine("OnChallenge");
-        
+
         context.HandleResponse();
         context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         context.Response.ContentType = "application/json";
-        var result = JsonConvert.SerializeObject(new { error = "Unauthorized" , message = context.ErrorDescription,
-        StatusCode = context.Response.StatusCode});
+        var result = JsonConvert.SerializeObject(new
+        {
+            error = "Unauthorized",
+            message = context.ErrorDescription,
+            StatusCode = context.Response.StatusCode
+        });
         return context.Response.WriteAsync(result);
     };
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -20,7 +21,7 @@ namespace TinyUrl.Migrations
                     username = table.Column<string>(type: "text", nullable: false),
                     tiny_url = table.Column<string>(type: "text", nullable: false),
                     original_url = table.Column<string>(type: "text", nullable: false),
-                    clicked_at = table.Column<string>(type: "text", nullable: false)
+                    clicked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
