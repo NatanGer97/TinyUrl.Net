@@ -13,6 +13,8 @@ namespace TinyUrl.Controllers
     [ApiController]
     public class IndexController : ControllerBase
     {
+        
+
         private readonly UserService userService;
         private readonly IUrlService urlService;
         private readonly ILogger<IndexController> logger;

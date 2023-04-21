@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -17,17 +18,21 @@ namespace TinyUrl.Controllers
     {
         private readonly UserService userService;
         private readonly IConfiguration configuration;
-        public UsersController(UserService userService, IConfiguration configuration)
+        private readonly IMapper mapper;
+        public UsersController(UserService userService, IConfiguration configuration, IMapper mapper)
         {
             this.configuration = configuration; 
             this.userService = userService;
+            this.mapper = mapper;
         }
-
+        
 
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetUsersAync()
         {
-            return await userService.GetUsersAync();
+            List<User> users = await userService.GetUsersAync();
+            return Ok(mapper.Map<List<UserDtoOut>>(users));
+
         }
 
         [HttpPost, Route("Register")]
@@ -39,7 +44,7 @@ namespace TinyUrl.Controllers
                 return BadRequest();
             }
 
-            User? userFromDb = await userService.FindUserByEmailAsync(registerReqDto.Email);
+            User? userFromDb = await userService.FindUserByUserNameAsync(registerReqDto.Email);
             if (userFromDb != null)
             {
                 return BadRequest("Email already exists");
@@ -60,7 +65,7 @@ namespace TinyUrl.Controllers
                 return BadRequest();
             }
 
-            User? userFromDb = await userService.FindUserByEmailAsync(loginReqDto.Email);
+            User? userFromDb = await userService.FindUserByUserNameAsync(loginReqDto.Email);
             if (userFromDb == null)
             {
                 return Unauthorized("Email or password is incorrect");
@@ -96,7 +101,7 @@ namespace TinyUrl.Controllers
             {
                 Subject = new System.Security.Claims.ClaimsIdentity(claims: new List<Claim>
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                     new Claim("Id", user.Id),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),

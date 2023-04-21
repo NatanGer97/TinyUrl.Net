@@ -38,6 +38,9 @@ builder.Services.AddSwaggerGen(options =>
 
 });
 
+// mapper
+builder.Services.AddAutoMapper(typeof(Program));
+
 // mongo
 builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<UserService>();

@@ -30,7 +30,7 @@ namespace TinyUrl.Controllers
         public async Task<ActionResult> CreateUrl([FromBody] NewTinyUrlReq newTinyUrlReq)
         {
 
-            User? user = await userService.FindUserByEmailAsync(newTinyUrlReq.Username);
+            User? user = await userService.FindUserByUserNameAsync(newTinyUrlReq.Username);
 
             if (user == null)
             {

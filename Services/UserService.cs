@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime.Internal.Util;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -12,13 +13,16 @@ namespace TinyUrl.Services
     {
         
         private readonly IMongoCollection<User> usersCollection;
+        private readonly IMapper mapper;
 
-        public UserService(IOptions<MongoDBSettings> mongoDbSettings)
+        public UserService(IOptions<MongoDBSettings> mongoDbSettings, IMapper mapper)
         {
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
-            createCollection(mongoDatabase);
-            this.usersCollection = mongoDatabase.GetCollection<User>("Users");
+            /*createCollection(mongoDatabase);*/
+            this.usersCollection = mongoDatabase.GetCollection<User>(mongoDbSettings.Value.UserCollectionName);
+
+            this.mapper = mapper;
         }
 
         private void createCollection(IMongoDatabase mongoDatabase)
@@ -34,8 +38,6 @@ namespace TinyUrl.Services
             {
                 Console.WriteLine("collection exists");
             }
-            
-
         }
 
     
@@ -43,6 +45,7 @@ namespace TinyUrl.Services
         public async Task<List<User>> GetUsersAync()
         {
             return await usersCollection.Find(_ => true).ToListAsync();
+            
         }
 
         /// <summary>
@@ -50,9 +53,9 @@ namespace TinyUrl.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns>user or null</returns>
-        public async Task<User?> FindUserByEmailAsync(string email)
+        public async Task<User?> FindUserByUserNameAsync(string username)
         {
-            return await usersCollection.Find(user => user.Email == email).FirstOrDefaultAsync();
+            return await usersCollection.Find(user => user.UserName == username).FirstOrDefaultAsync();
         }
 
         public async Task<User> CreateUser(UserRegisterReqDto registerReqDto)
@@ -60,14 +63,11 @@ namespace TinyUrl.Services
             PasswordHasher<string> passwordHasher = new PasswordHasher<string>();
             string hashedPassword = passwordHasher.HashPassword(string.Empty, registerReqDto.Password);
 
-            User newUser = new User() { Email = registerReqDto.Email, Password = hashedPassword, Name = registerReqDto.Name };
+            User newUser = new User() { UserName = registerReqDto.Email, Password = hashedPassword, FullName = registerReqDto.Name };
 
             await usersCollection.InsertOneAsync(newUser);
 
-            return await usersCollection.Find(user => user.Email == newUser.Email).FirstAsync();
-
-          
-
+            return await usersCollection.Find(user => user.UserName == newUser.UserName).FirstAsync();        
 
         }
 
@@ -76,18 +76,18 @@ namespace TinyUrl.Services
             return await usersCollection.Find(user => user.Id == userId).FirstOrDefaultAsync();
         }
 
-        public async Task<bool> IncrementMongoField(string userEmail, String key)
+        public async Task<bool> IncrementMongoField(string username, string key)
         {
-            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("Email", userEmail);
+            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("UserName", username);
             UpdateDefinition<User> updateDefinition = Builders<User>.Update.Inc(key, 1);
             UpdateResult updateResult = await usersCollection.UpdateOneAsync(filterDefinition, updateDefinition);
 
             return updateResult.ModifiedCount == 1;
         }
 
-        public async Task<bool> AddTinyUrlToUser(string tinyurl, string userEmail)
+        public async Task<bool> AddTinyUrlToUser(string tinyurl, string username)
         {
-            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("Email", userEmail);
+            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("UserName", username);
             UpdateDefinition<User> updateDefinition = Builders<User>.Update.AddToSet("urls", tinyurl);
 
             UpdateResult updateResult = await usersCollection.UpdateOneAsync(filterDefinition, updateDefinition);
