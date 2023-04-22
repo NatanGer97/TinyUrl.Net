@@ -12,6 +12,7 @@ using TinyUrl.Models.Dto;
 using TinyUrl.Models.Enums;
 using TinyUrl.Models.Responses;
 using TinyUrl.Services.interfaces;
+using TinyUrl.Strategy;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace TinyUrl.Services
@@ -40,13 +41,13 @@ namespace TinyUrl.Services
 
         public async Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq)
         {
-
-            string tinyCode = generateTinyCode();
+            TinyCodeGenerator tinyCodeGenerator = new TinyCodeGenerator();
+            string tinyCode = tinyCodeGenerator.GenerateCode();
             int counter = 0;
 
             while (redisService.isTinyCodeExist(tinyCode) && counter++ < NUM_OF_RETRIES)
             {
-                tinyCode = generateTinyCode();
+                tinyCode = tinyCodeGenerator.GenerateCode();
             }
 
             if (counter == NUM_OF_RETRIES)
@@ -118,7 +119,7 @@ namespace TinyUrl.Services
         }
 
         // TODO: move out -> strategy pattern(?)
-        private string generateTinyCode()
+       /* private string generateTinyCode()
         {
             StringBuilder code = new StringBuilder();
             Random random = new Random();
@@ -129,7 +130,7 @@ namespace TinyUrl.Services
             }
 
             return code.ToString();
-        }
+        }*/
 
      
     }

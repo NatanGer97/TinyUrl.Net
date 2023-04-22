@@ -27,13 +27,11 @@ namespace TinyUrl.Controllers
         private readonly IUrlService urlService;
         private readonly UserService userService;
         private readonly IUserClickService userClickService;
-        private readonly UrlController urlController;
-        public SeedController(IUrlService urlService, UserService userService, IUserClickService userClickService, UrlController urlController)
+        public SeedController(IUrlService urlService, UserService userService, IUserClickService userClickService)
         {
             this.urlService = urlService;
             this.userService = userService;
             this.userClickService = userClickService;
-            this.urlController = urlController;
             
         }
 
