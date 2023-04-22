@@ -9,6 +9,7 @@ using TinyUrl.Models.Responses;
 using TinyUrl.Services;
 using TinyUrl.Services.interfaces;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,6 +17,9 @@ namespace TinyUrl.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+    // TODO: add Dto mapping 
+    
     public class UrlController : ControllerBase
     {
         private readonly UserService userService;
