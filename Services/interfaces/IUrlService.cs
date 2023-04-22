@@ -16,6 +16,8 @@ namespace TinyUrl.Services.interfaces
 
         Task OnUrlClickAsync(UserClick userClick);
 
+        Task<List<TinyUrlInDB>> GetAllTinyCodesByUsernameAsync(string username);
+
 
 
 

@@ -92,6 +92,25 @@ namespace TinyUrl.Services
 
             return updateResult.ModifiedCount == 1;
         }
+        /// <summary>
+        /// increment query for clicks increamns with givven date
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="tinycode"></param>
+        /// <param name="key"></param>
+        /// <param name="clickedAt"></param>
+        /// <returns></returns>
+
+        public async Task<bool> IncrementClickFieldWithGivenDate(string username, string tinycode, DateTime clickedAt)
+        {
+            FilterDefinition<User> filterDefinition = Builders<User>.Filter.Eq("UserName", username);
+            UpdateDefinition<User> updateDefinition = Builders<User>.Update.Inc(tinycode + "_clicks_" + clickedAt.ToString("MM/yyyy"), 1);
+            UpdateResult updateResult = await usersCollection.UpdateOneAsync(filterDefinition, updateDefinition);
+
+            return updateResult.ModifiedCount == 1;
+        }
+
+
 
         /// <summary>
         /// creates key to mongo increment click query

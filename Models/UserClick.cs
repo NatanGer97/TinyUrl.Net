@@ -4,9 +4,9 @@
     {
 
         public long Id { get; set; }
-        public string Username { get; set; }
-        public string TinyUrl { get; set; }
-        public string OriginalUrl { get; set; }
+        public string? Username { get; set; }
+        public string? TinyUrl { get; set; }
+        public string? OriginalUrl { get; set; }
         public DateTime ClickedAt { get; set; } = DateTime.UtcNow;
 
         public static UserClick UserClickFrom(string username, string tinyUrl, string originalUrl, DateTime clickedAt)

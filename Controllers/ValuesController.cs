@@ -10,11 +10,11 @@ using TinyUrl.Services.interfaces;
 
 namespace TinyUrl.Controllers
 {
-    
+
     [ApiController]
     public class IndexController : ControllerBase
     {
-        
+
 
         private readonly UserService userService;
         private readonly IUrlService urlService;
@@ -46,11 +46,14 @@ namespace TinyUrl.Controllers
                 logger.LogInformation("Redirecting to -> " + url);
                 // on click 
                 await urlService.OnUrlClickAsync(userClick);
-             
+
                 return Redirect(url);
             }
 
             return NotFound();
         }
     }
+
+    
+        
 }

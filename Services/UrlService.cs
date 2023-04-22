@@ -103,6 +103,20 @@ namespace TinyUrl.Services
         }
 
 
+        public async Task<List<TinyUrlInDB>> GetAllTinyCodesByUsernameAsync(string username)
+        {
+            // TODO: test if user exsit
+
+            var filter = Builders<TinyUrlInDB>.Filter.Eq("Username", username);
+            List<TinyUrlInDB> tinyUrlInDBs = await tinyUrlCollection
+                .Find(tinyurlDocument => tinyurlDocument.Username.Equals(username))
+               .ToListAsync();
+          
+            return tinyUrlInDBs;
+
+
+        }
+
         // TODO: move out -> strategy pattern(?)
         private string generateTinyCode()
         {

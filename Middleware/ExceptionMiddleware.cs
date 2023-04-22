@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using StudentsDashboard.Errors;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using TinyUrl.Models.Exceptions;
 
@@ -74,6 +75,10 @@ namespace TinyUrl.Middleware
 
                 case KeyNotFoundException:
                     errorResults.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case ValidationException validationException:
+                    errorResults.StatusCode = (int)HttpStatusCode.BadRequest;
+                    errorResults.Messages.Add(validationException.Message);
                     break;
                 default:
                     errorResults.StatusCode = (int)HttpStatusCode.InternalServerError;

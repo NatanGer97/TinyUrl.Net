@@ -49,6 +49,14 @@ namespace TinyUrl.Controllers
             
             return BadRequest();
         }
+        [HttpPost("seed")]
+        public async Task<ActionResult> SeedData()
+        {
+            NewTinyUrlReq newTinyUrlReq = new NewTinyUrlReq() { Url = "http://www.google.com", Username = "Natan@gmail.com" };
+            ActionResult actionResult = await CreateUrl(newTinyUrlReq);
+
+            return actionResult;
+        }
 
     }
 }
