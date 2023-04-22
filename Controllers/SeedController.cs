@@ -6,6 +6,7 @@ using TinyUrl.Services;
 using System.ComponentModel.DataAnnotations;
 using TinyUrl.Services.interfaces;
 using TinyUrl.Models.Dto;
+using MongoDB.Driver.Linq;
 
 namespace TinyUrl.Controllers
 {
@@ -55,7 +56,7 @@ namespace TinyUrl.Controllers
             foreach (TinyUrlInDB tinyUrlDocument in tinyUrlsInDB)
             {
                 int counter = 0;
-                while (counter++ < 5)
+                while (counter++ < 100)
                 {
 
                     UserClick userClick = createNewUserClick(tinyUrlDocument);
@@ -66,10 +67,6 @@ namespace TinyUrl.Controllers
 
                 }
 
-
-
-               
-
             }
 
 
@@ -78,11 +75,20 @@ namespace TinyUrl.Controllers
 
         private UserClick createNewUserClick(TinyUrlInDB tinyUrlDocument)
         {
+            
             Random random = new Random();
-            DateTime randDateTime = DateTime.UtcNow
+            int month = random.Next(1, 13);
+            int year = random.Next(2019, 2024);
+            var currentDateTime = DateTime.UtcNow;
+            currentDateTime = currentDateTime.AddHours(random.Next(1, 11));
+            currentDateTime = currentDateTime.AddMinutes(random.Next(5, 50));
+            DateTime randDateTime = new DateTime(year, month, currentDateTime.Day, currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second).ToUniversalTime();
+
+            /*DateTime randDateTime = DateTime.UtcNow
                 .AddMinutes(random.Next(5, 50))
-                .AddHours(random.Next(1, 11))
-                .AddMonths(random.Next(1, 12));
+                .AddHours(random.Next(1, 11));*/
+
+
 
             UserClick userClick = new UserClick()
             {
