@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using TinyUrl.Models.Exceptions;
 
-namespace StudentsDashboard.Errors
+namespace TinyUrl.Errors
 {
     public class NotFoundException : CustomeException
     {

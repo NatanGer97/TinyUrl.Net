@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver.Core.Connections;
 using Newtonsoft.Json;
 using StackExchange.Redis;
-using StudentsDashboard.Errors;
+using TinyUrl.Errors;
 using TinyUrl.Models;
 using TinyUrl.Services.interfaces;
 

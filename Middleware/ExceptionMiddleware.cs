@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using StudentsDashboard.Errors;
+using TinyUrl.Errors;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using TinyUrl.Models.Exceptions;

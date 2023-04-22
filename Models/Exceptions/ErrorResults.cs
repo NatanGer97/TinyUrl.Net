@@ -1,4 +1,4 @@
-﻿namespace StudentsDashboard.Errors
+﻿namespace TinyUrl.Errors
 {
     public class ErrorResults
     {

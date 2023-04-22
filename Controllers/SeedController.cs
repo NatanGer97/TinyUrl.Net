@@ -14,17 +14,6 @@ namespace TinyUrl.Controllers
     [ApiController]
     public class SeedController : ControllerBase
     {
-        /* public async Task OnUrlClickAsync(UserClick userClick)
-         {
-             string tinyUrl = userClick.TinyUrl;
-             string username = userClick.Username;
-             // increment user clicks
-             await userService.IncrementClickField(username, string.Empty, eKeys.UserClicks);
-             await userService.IncrementClickField(username, tinyUrl, eKeys.UserTinyUrlsClicksMonth);
-             // save new click instacne
-             await userClickService.AddNewClickAsync(userClick);
-         }*/
-
         private readonly IUrlService urlService;
         private readonly UserService userService;
         private readonly IUserClickService userClickService;
@@ -35,22 +24,12 @@ namespace TinyUrl.Controllers
             this.userClickService = userClickService;
             
         }
-
        
 
         [HttpPost("seed_user_clicks")]
         public async Task<ActionResult> seedUserClicks([FromQuery, EmailAddress] string username)
         {
-            /*
-             *         string tinyUrl = userClick.TinyUrl;
-             string username = userClick.Username;
-             // increment user clicks
-             await userService.IncrementClickField(username, string.Empty, eKeys.UserClicks);
-             await userService.IncrementClickField(username, tinyUrl, eKeys.UserTinyUrlsClicksMonth);
-             // save new click instacne
-             await userClickService.AddNewClickAsync(userClick);
-             */
-            // get from mongo all tiny clicks
+
             List<TinyUrlInDB> tinyUrlsInDB = await urlService.GetAllTinyCodesByUsernameAsync(username);
             List<UserClick> userClicks = new List<UserClick>();
             foreach (TinyUrlInDB tinyUrlDocument in tinyUrlsInDB)
@@ -84,12 +63,7 @@ namespace TinyUrl.Controllers
             currentDateTime = currentDateTime.AddMinutes(random.Next(5, 50));
             DateTime randDateTime = new DateTime(year, month, currentDateTime.Day, currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second).ToUniversalTime();
 
-            /*DateTime randDateTime = DateTime.UtcNow
-                .AddMinutes(random.Next(5, 50))
-                .AddHours(random.Next(1, 11));*/
-
-
-
+   
             UserClick userClick = new UserClick()
             {
                 TinyUrl = tinyUrlDocument.Tiny,

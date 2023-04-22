@@ -2,7 +2,7 @@
 
 using TinyUrl.Contexts;
 
-namespace StudentsDashboard.UnitOfWork
+namespace TinyUrl.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {

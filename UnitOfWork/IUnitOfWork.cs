@@ -1,4 +1,4 @@
-﻿namespace StudentsDashboard.UnitOfWork
+﻿namespace TinyUrl.UnitOfWork
 {
     public interface IUnitOfWork
     {

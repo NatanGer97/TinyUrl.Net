@@ -7,7 +7,7 @@ using MongoDB.Driver.Core.Connections;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
-using StudentsDashboard.UnitOfWork;
+using TinyUrl.UnitOfWork;
 using System.Net;
 using System.Security.Cryptography.Xml;
 using System.Text;

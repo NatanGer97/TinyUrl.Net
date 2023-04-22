@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using StackExchange.Redis;
-using StudentsDashboard.Errors;
+using TinyUrl.Errors;
 using System.Text;
 using System.Text.Json;
 using TinyUrl.Builders;
