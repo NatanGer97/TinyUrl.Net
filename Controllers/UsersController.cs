@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
+using TinyUrl.Errors;
 using TinyUrl.Models;
 using TinyUrl.Models.Dto;
 using TinyUrl.Services;
@@ -19,14 +22,14 @@ namespace TinyUrl.Controllers
         private readonly UserService userService;
         private readonly IConfiguration configuration;
         private readonly IMapper mapper;
-        
+
         public UsersController(UserService userService, IConfiguration configuration, IMapper mapper)
         {
-            this.configuration = configuration; 
+            this.configuration = configuration;
             this.userService = userService;
             this.mapper = mapper;
         }
-        
+
 
         [HttpGet]
         public async Task<ActionResult<List<UserDtoOut>>> GetUsersAync()
@@ -36,8 +39,27 @@ namespace TinyUrl.Controllers
 
         }
 
+        [HttpGet("getUser")]
+        public async Task<ActionResult<UserDtoOut>> GetUserAsync([FromQuery, Required] string username)
+        {
+            if (username == null)
+            {
+                return BadRequest("username is required");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            User user = await userService.GetUser(username);
+
+            return Ok(mapper.Map<UserDtoOut>(user));
+
+
+        }
+
         [HttpPost, Route("Register")]
-        public async Task<ActionResult<User>> RegisterUserAsync([FromBody] UserRegisterReqDto registerReqDto)
+        public async Task<ActionResult<UserDtoOut>> RegisterUserAsync([FromBody] UserRegisterReqDto registerReqDto)
         {
             if (!ModelState.IsValid)
             {
@@ -53,13 +75,14 @@ namespace TinyUrl.Controllers
 
             // create new user
             User user = await userService.CreateUser(registerReqDto);
+            UserDtoOut userDtoOut = mapper.Map<UserDtoOut>(user);
 
-            return Ok(user);
+            return Created(string.Empty, userDtoOut);
         }
 
 
         [HttpPost, Route("Login")]
-        public async Task<ActionResult<User>> LoginUserAsync([FromBody] UserLoginReqDto loginReqDto)
+        public async Task<ActionResult<string>> LoginUserAsync([FromBody] UserLoginReqDto loginReqDto)
         {
             if (!ModelState.IsValid)
             {
@@ -113,12 +136,12 @@ namespace TinyUrl.Controllers
                 Expires = DateTime.UtcNow.AddSeconds(10),
 
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
-        };
+            };
             var token = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
             string jwtToken = jwtSecurityTokenHandler.WriteToken(token);
 
             return jwtToken;
-        
+
         }
     }
 }

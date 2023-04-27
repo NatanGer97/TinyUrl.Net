@@ -59,6 +59,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // postgreSql
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
+    //opt.UseNpgsql(builder.Configuration.GetConnectionString("SQlDeploy"));
     opt.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSqlConnection"));
 });
 
@@ -133,6 +134,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+/*app.UseSwagger();
+app.UseSwaggerUI();*/
 
 app.UseHttpsRedirection();
 

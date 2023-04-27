@@ -1,8 +1,11 @@
-﻿using MongoDB.Driver.Core.Connections;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using MongoDB.Driver.Core.Connections;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using TinyUrl.Errors;
 using TinyUrl.Models;
+using TinyUrl.Models.Dto;
+using TinyUrl.Models.Enums;
 using TinyUrl.Services.interfaces;
 
 namespace TinyUrl.Services
@@ -70,6 +73,18 @@ namespace TinyUrl.Services
             return isSuccess;
         }
 
+
+    
+
+        public bool SetValueWithTTL(string tinycode, object value, TimeSpan timeSpan)
+        {
+            bool isSuccess = redis.StringSet(tinycode, JsonConvert.SerializeObject(value), timeSpan);
+            logger.LogInformation("set key " + tinycode + " to redis, status: " + isSuccess + "Time Span: " + timeSpan);
+
+            return isSuccess;
+
+
+        }
 
     }
 }

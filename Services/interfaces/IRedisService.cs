@@ -1,4 +1,5 @@
 ﻿using TinyUrl.Models;
+using TinyUrl.Models.Dto;
 
 namespace TinyUrl.Services.interfaces
 {
@@ -27,5 +28,7 @@ namespace TinyUrl.Services.interfaces
         /// <param name="value"></param>
         /// <returns><see langword="true"/> if the string was set, <see langword="false"/> otherwise.</returns>
         bool SetValue(string key, object value);
+
+        bool SetValueWithTTL(string tinycode, object value, TimeSpan timeSpan);
     }
 }

@@ -14,6 +14,7 @@ using TinyUrl.Models.Responses;
 using TinyUrl.Services.interfaces;
 using TinyUrl.Strategy;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
+using TinyUrl.Models.Exceptions;
 
 namespace TinyUrl.Services
 {
@@ -22,13 +23,13 @@ namespace TinyUrl.Services
         private const int TINY_SIZE = 4;
         private const int NUM_OF_RETRIES = 5;
         private readonly string CHARS = "ABCDEFHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-       
+
         private readonly IMongoCollection<TinyUrlInDB> tinyUrlCollection;
         private readonly IRedisService redisService;
         private readonly UserService userService;
         private readonly IUserClickService userClickService;
 
-        public UrlService( IRedisService redisService, UserService userService,
+        public UrlService(IRedisService redisService, UserService userService,
             IOptions<MongoDBSettings> mongoDbSettings, IUserClickService userClickService)
         {
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
@@ -40,6 +41,20 @@ namespace TinyUrl.Services
         }
 
         public async Task<string> CreateNewTinyUrlAsync(NewTinyUrlReq newTinyUrlReq)
+        {
+            string tinyCode = CreateMapping();
+
+            TinyUrlInDB tinyUrlInDB = await addToDatabasesAsync(tinyCode, newTinyUrlReq);
+
+            if (tinyUrlInDB == null)
+            {
+                throw new InternalServerException("error while setting key into redis");
+            }
+
+            return "https://localhost:7112/" + tinyCode; ;
+        }
+
+        private string CreateMapping()
         {
             TinyCodeGenerator tinyCodeGenerator = new TinyCodeGenerator();
             string tinyCode = tinyCodeGenerator.GenerateCode();
@@ -55,15 +70,7 @@ namespace TinyUrl.Services
                 throw new InternalServerException("Can't generate tiny url, all options are taken");
             }
 
-           
-            TinyUrlInDB tinyUrlInDB = await addToDatabasesAsync(tinyCode, newTinyUrlReq);
-            
-            if (tinyUrlInDB == null)
-            {
-                throw new InternalServerException("error while setting key into redis");
-            }
-
-            return "https://localhost:7112/" + tinyCode; ;
+            return tinyCode;
         }
 
         public async Task OnUrlClickAsync(UserClick userClick)
@@ -76,6 +83,7 @@ namespace TinyUrl.Services
             // save new click instacne
             await userClickService.AddNewClickAsync(userClick);
         }
+
 
         private async Task<TinyUrlInDB> addToDatabasesAsync(string tinycode, NewTinyUrlReq newTinyUrlReq)
         {
@@ -104,6 +112,7 @@ namespace TinyUrl.Services
         }
 
 
+
         public async Task<List<TinyUrlInDB>> GetAllTinyCodesByUsernameAsync(string username)
         {
             // TODO: test if user exsit
@@ -112,26 +121,65 @@ namespace TinyUrl.Services
             List<TinyUrlInDB> tinyUrlInDBs = await tinyUrlCollection
                 .Find(tinyurlDocument => tinyurlDocument.Username.Equals(username))
                .ToListAsync();
-          
+
             return tinyUrlInDBs;
 
 
         }
 
-        // TODO: move out -> strategy pattern(?)
-       /* private string generateTinyCode()
-        {
-            StringBuilder code = new StringBuilder();
-            Random random = new Random();
 
-            for (int i = 0; i < TINY_SIZE; i++)
+        public async Task<string> CreateTemoraryLink(TemporyTinyUrlRequest temporyTinyUrlRequest)
+        {
+            string username = temporyTinyUrlRequest.Username;
+
+            User? user = await userService.FindUserByUserNameAsync(username);
+            if (user == null)
             {
-                code.Append(CHARS.ElementAt(random.Next(CHARS.Length)));
+                throw new NotFoundException($"user with username: {username} notfound");
+
             }
 
-            return code.ToString();
-        }*/
+            string tinyCode = this.CreateMapping();
 
-     
+            TimeSpan ttl_TimeSpan = buildTimeSpan(temporyTinyUrlRequest.timeToLiveKey, temporyTinyUrlRequest.TimeToLive);
+            NewTinyUrlReq newTinyUrlReq = new NewTinyUrlReq() { Url = temporyTinyUrlRequest.OriginalUrl, Username = username };
+
+            bool isSuccess = redisService.SetValueWithTTL(tinyCode, newTinyUrlReq, ttl_TimeSpan);
+            if (!isSuccess)
+            {
+                throw new CustomeException("error while create temporary tinyUrl");
+            }
+
+            return "https://localhost:7112/" + tinyCode; ;
+
+        }
+
+        private TimeSpan buildTimeSpan(eTinyUrlTimeToLiveKey timeToLiveKey, int timeToLive)
+        {
+            TimeSpan timeSpan = TimeSpan.Zero;
+
+            switch (timeToLiveKey)
+            {
+                case eTinyUrlTimeToLiveKey.Day:
+                    timeSpan = TimeSpan.FromDays(timeToLive);
+                    break;
+                case eTinyUrlTimeToLiveKey.Hour:
+                    timeSpan = TimeSpan.FromHours(timeToLive);
+                    break;
+                case eTinyUrlTimeToLiveKey.Minutes:
+                    timeSpan = TimeSpan.FromMinutes(timeToLive);
+                    break;
+                default:
+                    break;
+            }
+
+            return timeSpan;
+        }
+
+
+
+
+
+
     }
 }

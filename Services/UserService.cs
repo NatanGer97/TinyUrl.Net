@@ -1,10 +1,12 @@
 ﻿using Amazon.Runtime.Internal.Util;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
+using TinyUrl.Errors;
 using TinyUrl.Models;
 using TinyUrl.Models.Dto;
 using TinyUrl.Models.Enums;
@@ -15,11 +17,12 @@ namespace TinyUrl.Services
     {
 
         private readonly IMongoCollection<User> usersCollection;
+        private readonly IMongoDatabase mongoDatabase;
 
         public UserService(IOptions<MongoDBSettings> mongoDbSettings)
         {
             var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
+            mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
             /*createCollection(mongoDatabase);*/
             this.usersCollection = mongoDatabase.GetCollection<User>(mongoDbSettings.Value.UserCollectionName);
 
@@ -39,6 +42,26 @@ namespace TinyUrl.Services
             {
                 Console.WriteLine("collection exists");
             }
+        }
+
+        /// <summary>
+        /// get user by username
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException">if user not found</exception>
+        public async Task<User> GetUser(string username)
+        {
+            User? userFromDB = await this.FindUserByUserNameAsync(username);
+            if (userFromDB == null)
+            {
+                throw new NotFoundException($"user with username: {username} not found");                    
+            }
+
+            Console.WriteLine(userFromDB.ToJson());
+
+            return userFromDB;
+            
         }
 
 
@@ -127,7 +150,7 @@ namespace TinyUrl.Services
                     results = "UserClicks";
                     break;
                 case eKeys.UserTinyUrlsClicksMonth:
-                    results = tinycode + "_clicks_" + DateTime.UtcNow.ToString("MM/yyyy");
+                    results = tinycode + ".clicks." + DateTime.UtcNow.ToString("MM/yyyy");
                     break;
                 default:
                     break;

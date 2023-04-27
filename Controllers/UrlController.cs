@@ -10,6 +10,8 @@ using TinyUrl.Services;
 using TinyUrl.Services.interfaces;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using TinyUrl.Models.Enums;
+using System.Security.Policy;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -53,14 +55,27 @@ namespace TinyUrl.Controllers
             
             return BadRequest();
         }
-        [HttpPost("seed")]
-        public async Task<ActionResult> SeedData()
-        {
-            NewTinyUrlReq newTinyUrlReq = new NewTinyUrlReq() { Url = "http://www.google.com", Username = "Natan@gmail.com" };
-            ActionResult actionResult = await CreateUrl(newTinyUrlReq);
 
-            return actionResult;
-        }
+        // TODO: not done yet
+        //[HttpPost("CreateTempUrl")]
+    /*    public async Task<ActionResult> CreateTempUrl([FromBody] TemporyTinyUrlRequest request,
+            [FromQuery, Required] eTinyUrlTimeToLiveKey timeToLiveKey, [FromQuery, Required] int duration)
+        {
+            request.timeToLiveKey = timeToLiveKey;
+            request.TimeToLive = duration;
+            string tinyUrl = await urlService.CreateTemoraryLink(request);
+
+            return Created(string.Empty, tinyUrl);
+        }*/
+
+        /*   [HttpPost("seed")]
+           public async Task<ActionResult> SeedData()
+           {
+               NewTinyUrlReq newTinyUrlReq = new NewTinyUrlReq() { Url = "http://www.google.com", Username = "Natan@gmail.com" };
+               ActionResult actionResult = await CreateUrl(newTinyUrlReq);
+
+               return actionResult;
+           }*/
 
     }
 }

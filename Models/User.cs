@@ -13,8 +13,11 @@ namespace TinyUrl.Models
         public string UserName { get; set; }
         public string Password { get; set; }
 
+
         [BsonExtraElements]
-        public Dictionary<string, object>?ExtraStatProperties { get; set; }
+        public Dictionary<string, object>? UserStats { get; set; }
+
+
 
 
 

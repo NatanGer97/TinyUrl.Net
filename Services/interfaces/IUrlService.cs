@@ -18,6 +18,8 @@ namespace TinyUrl.Services.interfaces
 
         Task<List<TinyUrlInDB>> GetAllTinyCodesByUsernameAsync(string username);
 
+        Task<string> CreateTemoraryLink(TemporyTinyUrlRequest temporyTinyUrlRequest);
+
 
 
 
