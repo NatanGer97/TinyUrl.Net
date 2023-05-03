@@ -1,6 +1,7 @@
 # Tinyurl 
 REST API web service written in C# with .Net 6 framework, allows users to short URLs, monitor, track after them, and
 see statistics.
+(not finished yet)
 
 ## Technologies
 * **Backend**: .Net core 6 - C#
